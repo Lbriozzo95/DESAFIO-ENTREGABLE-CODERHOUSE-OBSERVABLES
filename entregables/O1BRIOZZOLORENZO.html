@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DESAFIO ENTREGABLE CODERHOUSE N4</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.3.0/rxjs.umd.min.js"></script>
+  </head>
+  <body>
+    <input type="text" name="" id="input" />
+    <label class="target" for=""></label>
+  </body>
+  <script>
+    const { Observable, fromEvent } = rxjs;
+    const { tap } = rxjs.operators;
+    const input = document.getElementById("input");
+    const targetScreen = document.querySelector(".target");
+
+    const finishProcesses = () => {
+      input.value = "";
+      input.disabled = true;
+      targetScreen.textContent = "";
+    };
+
+    const observable = new Observable((subscriber) => {
+      try {
+        const emitter = fromEvent(input, "keyup").pipe(
+          tap((e) => {
+            const targetValue = e.target.value;
+            if (targetValue === "error") subscriber.error("error ingresado");
+            if (targetValue === "complete") subscriber.complete();
+          })
+        );
+        emitter.subscribe(subscriber);
+
+        setTimeout(() => {
+          subscriber.complete();
+        }, 30000);
+      } catch (error) {
+        subscriber.error(error);
+      }
+    });
+
+    observable.subscribe({
+      next(e) {
+        const currTargetAsArr = e.target.value.split("");
+        targetScreen.textContent = currTargetAsArr.reverse().join("");
+      },
+      complete() {
+        finishProcesses();
+        console.log("completado.");
+      },
+      error(error) {
+        console.error(error);
+      },
+    });
+  </script>
+</html>
